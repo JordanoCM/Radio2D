@@ -25,7 +25,7 @@ void setup(){
 
 
 void draw(){
-  scale(1.2);//todo o programa foi desenvolvido numa escala menor por conta do modo janela, agora com o fullscreen podemos reajustar o tamanho
+  scale(1);//todo o programa foi desenvolvido numa escala menor por conta do modo janela, agora com o fullscreen podemos reajustar o tamanho
   translate(150,-50);//translate necessário por conta do scale
   if(ligado && modo!=0 && keyPressed && (keyCode == UP || keyCode == DOWN) && ruido==false){
     player2.loop();
@@ -365,28 +365,37 @@ ArrayList<String> loadRadioUrls(String filename) {//Leitura do txt com as URLs d
 
 
 
-void playRadio(int index) {//função para reproduzir as radios sem erro, só precisa do index da radio
+void playRadio(int index) {
   if (index >= 0 && index < radioUrls.size()) {
     if (player != null && player.isPlaying()) {
       player.close();
     }
     try {
       player = minim.loadFile(radioUrls.get(index));
+      
+      // VERIFICAÇÃO ADICIONADA: Checa se o minim falhou ao carregar a URL
+      if (player == null) {
+         throw new Exception("URL offline ou formato inválido"); 
+      }
+      
       player.play();
       currentRadioIndex = index;
     } 
     catch (Exception e) {
-      println("Erro ao reproduzir a URL N°: " + e.getMessage() + " " + index + " da lista" );
-      if(index < radioUrls.size())
-        playRadio(index+1);
-      else playRadio(0);
+      println("Erro ao reproduzir a URL N° " + index + " da lista: " + e.getMessage());
+      
+      // CORREÇÃO DE LÓGICA: Verifica "index + 1" para evitar erro de OutOfBounds
+      if (index + 1 < radioUrls.size()) {
+        playRadio(index + 1);
+      } else {
+        playRadio(0);
+      }
     }
   } 
   else {
     println("Índice de rádio inválido.");
   }
 }
-
 
 
 
